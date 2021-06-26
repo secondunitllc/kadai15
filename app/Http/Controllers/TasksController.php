@@ -15,14 +15,28 @@ class TasksController extends Controller
      */
     public function index()
     {
+        $data = [];
+        if (\Auth::check()) { // 認証済みの場合
+            // 認証済みユーザを取得
+            $user = \Auth::user();
+            // ユーザの投稿の一覧を作成日時の降順で取得
+            // （後のChapterで他ユーザの投稿も取得するように変更しますが、現時点ではこのユーザの投稿のみ取得します）
+            //$tasks = Task::all();
+            $tasks = $user->tasks()->get();
+
+            $data = [
+                'user' => $user,
+                'tasks' => $tasks,
+            ];
+            
+          
+        }
         
-        $tasks = Task::all();
-
-
-        return view('tasks.index', [
-            'tasks' => $tasks,
-        ]);
+        // Welcomeビューでそれらを表示
+        return view('welcome', $data);
+        
     }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -31,8 +45,10 @@ class TasksController extends Controller
      */
     public function create()
     {
+        $user = \Auth::user();
         $task = new Task;
         return view('tasks.create', [
+            'user' => $user,
             'task' => $task,
         ]);
     }
@@ -45,18 +61,20 @@ class TasksController extends Controller
      */
     public function store(Request $request)
     {
-        
+        $user =  $request->user;
         // バリデーション
         $request->validate([
             'content' => 'required',
             'status' => 'required|max:10'  // 追加
         ]);
         
+        
         $task = new Task;
         $task->status = $request->status;    // 追加
         $task->content = $request->content;
+        $task->user_id = $request->user()->id;
         $task->save();
-
+     
         // トップページへリダイレクトさせる
         return redirect('/');
     }
@@ -69,9 +87,11 @@ class TasksController extends Controller
      */
     public function show($id)
     {
-       $task = Task::findOrFail($id);
+        //$user = \Auth::user();
+        $task = Task::findOrFail($id);
 
         return view('tasks.show', [
+            //'user' => $user,
             'task' => $task,
         ]);
     }
@@ -84,11 +104,12 @@ class TasksController extends Controller
      */
     public function edit($id)
     {
-
+        //$user = \Auth::user();
         $task = Task::findOrFail($id);
 
 
         return view('tasks.edit', [
+            //'user' => $user,
             'task' => $task,
         ]);
     }
@@ -102,6 +123,8 @@ class TasksController extends Controller
      */
     public function update(Request $request, $id)
     {
+        //$user = \Auth::user();
+        
         // バリデーション
         $request->validate([
             'content' => 'required',
@@ -111,6 +134,7 @@ class TasksController extends Controller
         $task = Task::findOrFail($id);
         $task->status = $request->status;    // 追加
         $task->content = $request->content;
+        //$task->user_id = $request->user()->id;
         $task->save();
 
         // トップページへリダイレクトさせる
@@ -125,12 +149,16 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
-
+    
+    // idの値で投稿を検索して取得
         $task = Task::findOrFail($id);
 
-        $task->delete();
+        // 認証済みユーザ（閲覧者）がその投稿の所有者である場合は、投稿を削除
+        if (\Auth::id() === $task->user_id) {
+            $task->delete();
+        }
 
-        // トップページへリダイレクトさせる
+        // 前のURLへリダイレクトさせる
         return redirect('/');
     }
 }
