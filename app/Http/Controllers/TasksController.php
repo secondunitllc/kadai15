@@ -87,13 +87,20 @@ class TasksController extends Controller
      */
     public function show($id)
     {
+        
+        
         //$user = \Auth::user();
         $task = Task::findOrFail($id);
-
+        
+        if (\Auth::id() === $task->user_id) {
         return view('tasks.show', [
             //'user' => $user,
             'task' => $task,
         ]);
+        }
+        
+    
+    
     }
 
     /**
@@ -104,14 +111,16 @@ class TasksController extends Controller
      */
     public function edit($id)
     {
+        
         //$user = \Auth::user();
         $task = Task::findOrFail($id);
 
-
+        if (\Auth::id() === $task->user_id) {
         return view('tasks.edit', [
             //'user' => $user,
             'task' => $task,
         ]);
+        }
     }
 
     /**s
@@ -150,6 +159,7 @@ class TasksController extends Controller
     public function destroy($id)
     {
     
+    
     // idの値で投稿を検索して取得
         $task = Task::findOrFail($id);
 
@@ -160,5 +170,5 @@ class TasksController extends Controller
 
         // 前のURLへリダイレクトさせる
         return redirect('/');
-    }
-}
+    }}
+
