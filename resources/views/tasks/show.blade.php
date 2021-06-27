@@ -1,8 +1,9 @@
 @extends('layouts.app')
 @section('content')
 
+
 <h1>id = {{ $task->id }} のタスク詳細ページ</h1>
-    
+    @if (Auth::id() == $task->user_id)
     <table class="table table-bordered">
         <tr>
             <th>id</th>
@@ -25,5 +26,5 @@
     {!! Form::model($task, ['route' => ['tasks.destroy', $task->id], 'method' => 'delete']) !!}
         {!! Form::submit('削除', ['class' => 'btn btn-danger']) !!}
     {!! Form::close() !!}
-
+@endif
 @endsection
