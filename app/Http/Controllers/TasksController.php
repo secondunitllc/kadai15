@@ -46,7 +46,7 @@ class TasksController extends Controller
      */
     public function create()
     {
-        if (\Auth::id() === $task->user_id) {
+       if (\Auth::check()) {
         $user = \Auth::user();
         $task = new Task;
         return view('tasks.create', [
@@ -66,7 +66,7 @@ class TasksController extends Controller
      */
     public function store(Request $request)
     {
-         if (\Auth::id() === $task->user_id) {
+        if (\Auth::check()) {
         $user =  $request->user;
         // バリデーション
         $request->validate([
@@ -142,7 +142,7 @@ class TasksController extends Controller
     public function update(Request $request, $id)
     {
         //$user = \Auth::user();
-        if (\Auth::id() === $task->user_id) {
+        if (\Auth::check()) {
         // バリデーション
         $request->validate([
             'content' => 'required',
