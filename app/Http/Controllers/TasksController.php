@@ -15,6 +15,7 @@ class TasksController extends Controller
      */
     public function index()
     {
+        
         $data = [];
         if (\Auth::check()) { // 認証済みの場合
             // 認証済みユーザを取得
@@ -45,12 +46,16 @@ class TasksController extends Controller
      */
     public function create()
     {
+        if (\Auth::id() === $task->user_id) {
         $user = \Auth::user();
         $task = new Task;
         return view('tasks.create', [
             'user' => $user,
             'task' => $task,
         ]);
+        }
+        
+        return redirect('/');
     }
 
     /**
@@ -61,6 +66,7 @@ class TasksController extends Controller
      */
     public function store(Request $request)
     {
+         if (\Auth::id() === $task->user_id) {
         $user =  $request->user;
         // バリデーション
         $request->validate([
@@ -74,7 +80,7 @@ class TasksController extends Controller
         $task->content = $request->content;
         $task->user_id = $request->user()->id;
         $task->save();
-     
+         }
         // トップページへリダイレクトさせる
         return redirect('/');
     }
@@ -136,7 +142,7 @@ class TasksController extends Controller
     public function update(Request $request, $id)
     {
         //$user = \Auth::user();
-        
+        if (\Auth::id() === $task->user_id) {
         // バリデーション
         $request->validate([
             'content' => 'required',
@@ -148,7 +154,7 @@ class TasksController extends Controller
         $task->content = $request->content;
         //$task->user_id = $request->user()->id;
         $task->save();
-
+        }
         // トップページへリダイレクトさせる
         return redirect('/');
     }
